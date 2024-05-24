@@ -1,0 +1,25 @@
+#### step 1 
+
+go to the flask directory "cd flask" if already inside it in terminal then:
+
+(enter command) 
+
+python -m venv venv
+
+#### step-2
+
+(eter command)
+
+venv/Scripts/activate
+
+#### step-3:
+
+(enter command)
+
+pip install -r requirements.txt
+
+#### step-4:
+
+(enter-command)
+
+python app.py
