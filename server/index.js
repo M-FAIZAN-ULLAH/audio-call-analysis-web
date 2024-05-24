@@ -2,6 +2,8 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const connectDB = require("./database/connectDB");
+const userRoutes = require("./routes/userRoutes");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -15,20 +17,13 @@ app.use(express.json());
 // Middleware to enable Cross-Origin Resource Sharing (CORS)
 app.use(cors());
 
-// Define a route
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
-});
+// Connect to MongoDB
+connectDB();
 
-// Define a route with environment variable
-app.get("/secret", (req, res) => {
-  const secretMessage =
-    process.env.SECRET_MESSAGE || "No secret message defined";
-  res.send(secretMessage);
-});
+app.use("/api", userRoutes);
 
 // Start the server
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
