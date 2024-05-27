@@ -5,14 +5,14 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "your_gmail_account@gmail.com",
-    pass: "your_password",
+    user: "mfaizanullah336@gmail.com",
+    pass: "poco hdyc ggmt uazw",
   },
 });
 
 async function sendAccountUpdateEmail(receiverEmail, title, password) {
   const mailOptions = {
-    from: '"ACAS Support" <your_gmail_account@gmail.com>',
+    from: "mfaizanullah336@gmail.com",
     to: receiverEmail,
     subject: "ACAS Account Update",
     html: `
