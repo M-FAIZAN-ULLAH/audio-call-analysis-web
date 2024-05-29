@@ -20,13 +20,18 @@ app.use(express.json());
 app.use(CookieParser());
 
 // Middleware to enable Cross-Origin Resource Sharing (CORS)
-app.use(cors());
+// app.use(cors());
+
+const corsOption = {
+  origin: ["http://127.0.0.1:8000"],
+};
+app.use(cors(corsOption));
 
 // Connect to MongoDB
 connectDB();
 
 app.use("/api", userRoutes);
-app.use("/api/analysis", analysisRoutes);
+app.use("/api", analysisRoutes);
 
 // Start the server
 const port = process.env.PORT || 5000;

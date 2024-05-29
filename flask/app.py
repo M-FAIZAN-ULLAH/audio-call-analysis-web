@@ -12,7 +12,9 @@ app = Flask(__name__)
 CORS(app)
 
 
-HUME_API_KEY = "pzzjXShj4CFRCd2mzFjoAM2Mdq5cGyYuRyGGHR3CJE4tSBsr"
+# HUME_API_KEY = "Aw8WEkvPYENhoiGjZ3hA4MbiuJGGfs6E5aGQKSRFH0zMcK7ll1mo8u1JLNdynG7N"
+
+HUME_API_KEY = "tU7rsK37ybnJxvRF3h5uUNMwNpAnaamXBOpRQCtm1MkVuV93"
 
 
 def process_mp3(file_path):
@@ -48,6 +50,7 @@ def upload_file():
 
         data = request.json
         url = data.get('url', '')
+        # url = "https://res.cloudinary.com/dczyj0axu/video/upload/v1703717874/Fiver/cefsvhmbbactonxmw2cz.mp3"
         result = process_mp3(str(url))
 
         return jsonify(result)

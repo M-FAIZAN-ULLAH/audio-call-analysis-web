@@ -12,10 +12,10 @@ const createAnalysis = async (req, res) => {
       url: link,
     });
     const formattedData = formatData(axiosResponse.data);
-    await User.findOneAndUpdate(
-      { _id: req.userId },
-      { $inc: { analysisCount: 1 } }
-    );
+    // await User.findOneAndUpdate(
+    //   { _id: req.userId },
+    //   { $inc: { analysisCount: 1 } }
+    // );
 
     res.status(201).send(formattedData);
   } catch (error) {

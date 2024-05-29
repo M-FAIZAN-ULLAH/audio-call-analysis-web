@@ -10,7 +10,7 @@ const {
 const router = express.Router();
 
 // For analyzing the audio file. Also saves it to the database.
-router.post("/", verifyToken, createAnalysis);
+router.post("/analysis", createAnalysis);
 
 // For saving the analysis to the database.
 router.post("/save", verifyToken, saveAnalysis);
