@@ -1,38 +1,48 @@
-import { useState } from 'react';
-import { Modal, Button } from 'antd';
-import styles from "../../styles/Header.module.css"
+import { useState, useEffect } from 'react';
+import styles from '../../styles/Header.module.css';
+import { FaHeadphones } from 'react-icons/fa'; // Importing the Font Awesome headphones icon
 
 const Header = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollTop, setLastScrollTop] = useState(0);
 
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop > lastScrollTop) {
+        // Downscroll
+        setIsVisible(false);
+      } else {
+        // Upscroll
+        setIsVisible(true);
+      }
+      setLastScrollTop(scrollTop <= 0 ? 0 : scrollTop); // For Mobile or negative scrolling
+    };
 
-  const handleOk = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollTop]);
 
   return (
-    <header className="bg-blue-500 text-white p-4 flex justify-between items-center">
-      <h1  className={styles.mycolor}>My Header</h1>
-      <Button type="primary" onClick={showModal}>
-        Open Modal
-      </Button>
-      <Modal
-        title="Ant Design Modal"
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-        <p>Some contents...</p>
-      </Modal>
+    <header className={`${styles.header} ${isVisible ? styles.visible : styles.hidden}`}>
+      <div className="flex items-center text-white font-bold text-lg md:text-xl lg:text-1xl font-sans">
+        <FaHeadphones className="w-4 h-3 md:w-8 md:h-8 lg:w-10 lg:h-10 text-purple-500 mr-2" />
+        <h2 style={{ marginLeft: '15px' }}>AUDIO INSIGHTS</h2>
+      </div>
+      <nav className="flex space-x-5 text-base md:text-md font-sans">
+        <a href="#features" className="text-white hover:text-purple-500">
+          Features
+        </a>
+        <a href="#contact" className="text-white hover:text-purple-500">
+          Guidelines
+        </a>
+        <a href="#contact" className="text-white hover:text-purple-500">
+          Contact
+        </a>
+        <a href="#get-started" className="text-white hover:text-purple-500">
+          Get Started
+        </a>
+      </nav>
     </header>
   );
 };

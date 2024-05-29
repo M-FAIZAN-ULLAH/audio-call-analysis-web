@@ -1,0 +1,7 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Adjust as needed */
+    grid-gap: 10px; /* Adjust spacing between sections */
+    /* Other styles... */
+  }
+  

@@ -1,0 +1,16 @@
+/* Hero.module.css */
+
+.hero {
+  min-height: 650px; /* Adjust as needed */
+  padding-left: 2rem; /* Add left padding */
+  padding-top: 9rem;
+  height: 720px;
+}
+
+.imageContainer {
+ 
+  margin-right: 40px; /* Adjust the value as needed */
+}
+
+
+/* Add any other styles you need here */
