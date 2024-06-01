@@ -1,0 +1,58 @@
+/* Features.module.css */
+
+.features {
+  padding-left: 2rem;
+  padding-right: 2rem;
+ 
+ 
+}
+
+.square {
+  width: max-content;
+  background-color: purple;
+  color: white;
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem; /* Smaller font size */
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+}
+
+.card {
+  background-color: white;
+  color: black;
+  padding: 0.75rem; /* Adjust padding */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  text-align: center;
+  height: 140px; /* Adjust the height to make the cards smaller */
+  width: 300px; /* Adjust the width of the cards */
+}
+
+.card:hover {
+  background-color: black;
+  color: rgb(255, 255, 255);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjust minmax values to control card width */
+  gap: 1rem; /* Adjust gap between cards */
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: 0.5rem; /* Reduce padding */
+    height: 160px; /* Adjust height */
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    padding: 0.5rem; /* Reduce padding */
+    height: 180px; /* Adjust height */
+  }
+}

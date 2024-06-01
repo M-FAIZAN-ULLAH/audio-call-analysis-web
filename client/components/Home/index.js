@@ -1,24 +1,21 @@
-// import React from "react";
-// import { Button } from "antd";
-
-// function Home() {
-//   return (
-//     <>
-//       <Button>Ant button</Button>
-//     </>
-//   );
-// }
-
-// export default Home;
-
 import React from "react";
-import { Button } from "antd";
+import Header from "./Header";
+import Hero from "./Hero";
+import Guidelines from "./Guidelines";
+import Features from "./Features";
+import Contact from "./Contact";
+import Footer from "./Footer";
 
 const Home = () => {
   return (
-    <div className="flex justify-center items-center h-screen">
-      <Button type="primary">Ant Design Button with Tailwind CSS</Button>
-    </div>
+    <div className="bg-white min-h-screen">
+    <Header />
+    <Hero/>
+    <Guidelines/>
+    <Features/>
+    <Contact/>
+    <Footer/>
+  </div>
   );
 };
 

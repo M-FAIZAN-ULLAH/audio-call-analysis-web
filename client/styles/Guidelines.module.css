@@ -1,0 +1,30 @@
+
+  
+  /* guidelines.module.css */
+
+.guidelines {
+  padding-left: 2rem; /* Adjust as needed */
+  padding-right: 2rem; /* Adjust as needed */
+  padding-top: 10rem;
+  padding-bottom: 10rem;
+}
+
+.card {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.9s ease-out, transform 0.9s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Increased shadow */
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); /* Further increase shadow on hover */
+}
+.card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card.hidden {
+  opacity: 0;
+  transform: translateY(50px);
+}
