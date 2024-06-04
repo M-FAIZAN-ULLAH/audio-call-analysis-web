@@ -56,9 +56,9 @@ const DashboardLayout = ({ children }) => {
         </Header>
         {/*  className="mt-16 p-4" */}
         <Content style={{ backgroundColor: "white" }}>
-          <div className="container mx-auto flex flex-col items-center justify-center h-full">
+         
             {children}
-          </div>
+         
         </Content>
       </Layout>
     </Layout>
