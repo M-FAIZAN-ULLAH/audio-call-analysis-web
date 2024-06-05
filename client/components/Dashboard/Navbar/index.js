@@ -1,9 +1,11 @@
 import { Layout, Menu } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
+import { useUser } from "../../utilis/userContext";
 
 const { Header } = Layout;
 
 const Navbar = () => {
+  const { currentUser, isAuthenticated } = useUser();
   return (
     <Header className="bg-white shadow-md">
       <div className="flex justify-between items-center">

@@ -1,20 +1,47 @@
 // import { useState } from "react";
 // import { Layout, Menu } from "antd";
+// import axiosClient from "../../../api/axiosClient";
 // import {
 //   HomeOutlined,
 //   UserOutlined,
-//   SettingOutlined,
 //   NotificationOutlined,
 //   LogoutOutlined,
 // } from "@ant-design/icons";
+// import { useUser } from "../../utilis/userContext";
+// import { useRouter } from "next/router";
 
 // const { Sider } = Layout;
 
 // const Sidebar = () => {
+//   const router = useRouter();
+//   const { setCurrentUser } = useUser();
 //   const [selectedKey, setSelectedKey] = useState("1");
 
 //   const handleClick = (e) => {
 //     setSelectedKey(e.key);
+//     switch (e.key) {
+//       case "1":
+//         router.push("/dashboard");
+//         break;
+//       case "2":
+//         router.push("/dashboard/bulk-analysis");
+//         break;
+//       case "4":
+//         router.push("/dashboard");
+//         break;
+//       default:
+//         break;
+//     }
+//   };
+
+//   const handleLogout = async () => {
+//     try {
+//       await axiosClient.post("/logout");
+//       setCurrentUser(null);
+//       router.push("/");
+//     } catch (error) {
+//       console.log(error);
+//     }
 //   };
 
 //   return (
@@ -31,13 +58,12 @@
 //     >
 //       <Menu
 //         style={{
-//           marginTop: "15px",
+//           marginTop: "10px",
 //           marginLeft: "30px",
-//           height: "625px",
+//           height: "725px",
 //           justifyContent: "center",
 //           width: "250px",
 //           backgroundColor: "black",
-//           color: "black",
 //           gap: "40px",
 //         }}
 //         theme="light"
@@ -58,48 +84,54 @@
 //         </div>
 //         <hr style={{ marginTop: "30px" }}></hr>
 //         <Menu.Item
-//           style={{ color: "white", marginTop: "70px" }}
+//           style={{
+//             color: selectedKey === "1" ? "black" : "white",
+//             marginTop: "70px",
+//           }}
 //           key="1"
 //           icon={<HomeOutlined />}
 //         >
-//           Home
-//         </Menu.Item>
-//         <div style={{ marginTop: "10px" }}></div>
-//         <Menu.Item style={{ color: "white" }} key="2" icon={<UserOutlined />}>
-//           Profile
+//           Analysis
 //         </Menu.Item>
 //         <div style={{ marginTop: "10px" }}></div>
 //         <Menu.Item
-//           style={{ color: "white" }}
-//           key="3"
-//           icon={<SettingOutlined />}
+//           style={{ color: selectedKey === "2" ? "black" : "white" }}
+//           key="2"
+//           icon={<UserOutlined />}
 //         >
-//           Settings
+//           Bulk Analysis
 //         </Menu.Item>
 //         <div style={{ marginTop: "10px" }}></div>
-
+//         <div style={{ marginTop: "10px" }}></div>
 //         <Menu.Item
-//           style={{ color: "white" }}
+//           style={{ color: selectedKey === "4" ? "black" : "white" }}
 //           key="4"
 //           icon={<NotificationOutlined />}
 //         >
-//           Notifications
+//           History
 //         </Menu.Item>
 //         <div style={{ marginTop: "10px" }}></div>
 //         <Menu.Item
-//           //   key="5"
-
 //           icon={<LogoutOutlined />}
 //           style={{
 //             marginBottom: "30px",
 //             marginLeft: "35px",
 //             position: "absolute",
 //             bottom: 0,
-//             width: "100%",
+//             width: "80%",
 //             color: "white",
 //           }}
 //         >
 //           Logout
+//           <button
+//             onClick={(e) => {
+//               e.stopPropagation(); // Prevents handleClick from being called
+//               handleLogout();
+//             }}
+//             style={{ color: "black", fontWeight: "600" }}
+//           >
+//             Logout
+//           </button>
 //         </Menu.Item>
 //       </Menu>
 //     </Sider>
@@ -108,24 +140,71 @@
 
 // export default Sidebar;
 
-// components/Sidebar.js
-import { useState } from "react";
-import { Layout, Menu } from "antd";
+import { useEffect, useState } from "react";
+import { Layout, Menu, Button } from "antd";
+import axiosClient from "../../../api/axiosClient";
 import {
   HomeOutlined,
   UserOutlined,
-  SettingOutlined,
   NotificationOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
+import { useUser } from "../../utilis/userContext";
+import { useRouter } from "next/router";
 
 const { Sider } = Layout;
 
 const Sidebar = () => {
-  const [selectedKey, setSelectedKey] = useState("1");
+  const router = useRouter();
+  const { setCurrentUser } = useUser();
+  const [selectedKey, setSelectedKey] = useState("");
+
+  useEffect(() => {
+    // Set the initial selectedKey based on the current route
+    const path = router.pathname.split("/")[2]; // Assuming the structure is /dashboard/[page]
+    let key = "";
+    switch (path) {
+      case "":
+      case "home":
+        key = "1";
+        break;
+      case "bulk-analysis":
+        key = "2";
+        break;
+      case "history":
+        key = "4";
+        break;
+      default:
+        break;
+    }
+    setSelectedKey(key);
+  }, []);
 
   const handleClick = (e) => {
     setSelectedKey(e.key);
+    switch (e.key) {
+      case "1":
+        router.push("/dashboard");
+        break;
+      case "2":
+        router.push("/dashboard/bulk-analysis");
+        break;
+      case "4":
+        router.push("/dashboard");
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post("/logout");
+      setCurrentUser(null);
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -175,7 +254,7 @@ const Sidebar = () => {
           key="1"
           icon={<HomeOutlined />}
         >
-          Home
+          Dashboard
         </Menu.Item>
         <div style={{ marginTop: "10px" }}></div>
         <Menu.Item
@@ -183,38 +262,45 @@ const Sidebar = () => {
           key="2"
           icon={<UserOutlined />}
         >
-          Profile
+          Bulk Analysis
         </Menu.Item>
         <div style={{ marginTop: "10px" }}></div>
-        <Menu.Item
-          style={{ color: selectedKey === "3" ? "black" : "white" }}
-          key="3"
-          icon={<SettingOutlined />}
-        >
-          Settings
-        </Menu.Item>
         <div style={{ marginTop: "10px" }}></div>
         <Menu.Item
           style={{ color: selectedKey === "4" ? "black" : "white" }}
           key="4"
           icon={<NotificationOutlined />}
         >
-          Notifications
+          History
         </Menu.Item>
         <div style={{ marginTop: "10px" }}></div>
-        <Menu.Item
+        {/* <Menu.Item
           icon={<LogoutOutlined />}
           style={{
             marginBottom: "30px",
             marginLeft: "35px",
             position: "absolute",
             bottom: 0,
-            width: "100%",
+            width: "80%",
             color: "white",
           }}
         >
           Logout
-        </Menu.Item>
+        </Menu.Item> */}
+        <Button
+          onClick={(e) => {
+            handleLogout();
+          }}
+          style={{
+            color: "black",
+            fontWeight: "600",
+            width: "180px",
+            marginTop: "370px",
+            marginLeft: "30px",
+          }}
+        >
+          Logout
+        </Button>
       </Menu>
     </Sider>
   );

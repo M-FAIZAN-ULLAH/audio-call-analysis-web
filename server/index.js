@@ -8,7 +8,7 @@ const CookieParser = require("cookie-parser");
 // Importing Routes file
 const analysisRoutes = require("./routes/analysisRoutes");
 const userRoutes = require("./routes/userRoutes");
-const bulkAnalysisRoutes=require("./routes/bulkAnalysisRoutes");
+const bulkAnalysisRoutes = require("./routes/bulkAnalysisRoutes");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -19,13 +19,10 @@ const app = express();
 // Middleware to parse JSON request bodies
 app.use(express.json());
 app.use(CookieParser());
-app.use(cors({ origin: 'http://localhost:3000' }));
-
-// Middleware to enable Cross-Origin Resource Sharing (CORS)
-// app.use(cors());
 
 const corsOption = {
-  origin: ["http://127.0.0.1:8000"],
+  origin: ["http://127.0.0.1:8000", "http://localhost:3000"],
+  credentials: true,
 };
 app.use(cors(corsOption));
 
@@ -34,7 +31,7 @@ connectDB();
 
 app.use("/api", userRoutes);
 app.use("/api", analysisRoutes);
-app.use("/api",bulkAnalysisRoutes)
+app.use("/api", bulkAnalysisRoutes);
 
 // Start the server
 const port = process.env.PORT || 5000;

@@ -1,11 +1,14 @@
 import "../styles/globals.css";
+import { UserProvider } from "../components/utilis/userContext";
 import { ConfigProvider } from "antd";
 
 function MyApp({ Component, pageProps }) {
   return (
-    <ConfigProvider>
-      <Component {...pageProps} />
-    </ConfigProvider>
+    <UserProvider>
+      <ConfigProvider>
+        <Component {...pageProps} />
+      </ConfigProvider>
+    </UserProvider>
   );
 }
 

@@ -21,6 +21,8 @@ const registerUser = async (req, res) => {
     // Generate a random 8-digit password
     const plainPassword = generatePassword();
 
+    console.log(req.body.email, req.body.username);
+
     // Send the email with the generated password
     await sendAccountUpdateEmail(
       req.body.email,

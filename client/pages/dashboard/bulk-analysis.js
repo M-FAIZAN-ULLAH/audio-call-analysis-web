@@ -1,11 +1,11 @@
 import React from "react";
-import Home from "../../components/Dashboard/Content/home";
+import BulkAnalysis from "../../components/Dashboard/Content/BulkAnalysis";
 import ProtectedRoute from "../../components/utilis/Protected";
 
 function index() {
   return (
     <ProtectedRoute>
-      <Home />
+      <BulkAnalysis />
     </ProtectedRoute>
   );
 }
