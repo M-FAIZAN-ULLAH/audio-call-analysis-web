@@ -4,6 +4,7 @@ import styles from '../../styles/Features.module.css';
 
 const Features = () => {
   return (
+    <section id="features">
     <div className={`${styles.features} bg-black text-white py-16`}>
       <div className="container mx-auto text-center">
         <div className={`${styles.square} mb-8`}>Our Offerings</div>
@@ -43,6 +44,7 @@ const Features = () => {
         </div>
       </div>
     </div>
+    </section>
   );
 };
 

@@ -7,7 +7,12 @@ const folderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  audioFiles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AudioFile' }]
+  audioFiles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AudioFile' }],
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  }
 });
 
 const Folder = mongoose.model('Folder', folderSchema);

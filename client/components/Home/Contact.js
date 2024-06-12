@@ -5,6 +5,7 @@ import styles from '../../styles/Contact.module.css';
 
 const Contact = () => {
     return (
+        <section id="contact">
         <div className={`${styles.contact}  py-16`}>
             <div className="container mx-auto text-center">
                 <h2 className="text-3xl font-bold text-white mb-4">Contact Us</h2>
@@ -34,6 +35,7 @@ const Contact = () => {
                 </form>
             </div>
         </div>
+        </section>
     );
 };
 

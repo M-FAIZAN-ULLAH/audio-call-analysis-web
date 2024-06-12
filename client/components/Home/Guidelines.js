@@ -36,6 +36,7 @@ const Guidelines = () => {
   }, []);
 
   return (
+    <section id="guidelines">
     <div className={`${styles.guidelines} container mx-auto py-16 text-center`}>
       <h2 className="text-5xl font-bold text-black mb-4">Guidelines for Audio Call Analysis</h2>
       <p className="text-gray-500 mb-8 text-2xl mt-8">Follow these guidelines to get the most out of our{' '}
@@ -68,6 +69,7 @@ const Guidelines = () => {
         </div>
       </div>
     </div>
+    </section>
   );
 };
 

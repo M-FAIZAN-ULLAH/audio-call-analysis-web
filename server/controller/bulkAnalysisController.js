@@ -6,8 +6,8 @@ const AudioFile = require('../model/AudioFile');
 const bulkAnalysisController = {
   createFolder: async (req, res) => {
     try {
-      const { name } = req.body;
-      const folder = new Folder({ name });
+      const { name, userId } = req.body; // Added userId to the request body
+      const folder = new Folder({ name, userId }); // Pass userId to the folder
       await folder.save();
       res.status(201).json({ message: 'Folder created successfully', folder });
     } catch (error) {
@@ -31,6 +31,15 @@ const bulkAnalysisController = {
       const { id } = req.params;
       await Folder.findByIdAndDelete(id);
       res.json({ message: 'Folder deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
+  getAllFolders: async (req, res) => {
+    try {
+      const folders = await Folder.find();
+      res.status(200).json({ folders });
     } catch (error) {
       res.status(500).json({ error: 'Internal server error' });
     }

@@ -1,5 +1,5 @@
 import React from "react";
-import BulkAnalysis from "../../components/Dashboard/Content/BulkAnalysis";
+import BulkAnalysis from "../../components/Dashboard/Content/Bulk/BulkAnalysis";
 import ProtectedRoute from "../../components/utilis/Protected";
 
 function index() {
