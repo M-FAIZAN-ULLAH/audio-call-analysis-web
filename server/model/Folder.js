@@ -1,20 +1,27 @@
 // models/Folder.js
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const folderSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
-  audioFiles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AudioFile' }],
+  audioFiles: [
+    {
+      url: String,
+      fileName: String,
+    },
+  ],
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: false
-  }
+    // type: mongoose.Schema.Types.ObjectId,
+    // ref: "User",
+    // required: false,
+    type: String,
+    required: false,
+  },
 });
 
-const Folder = mongoose.model('Folder', folderSchema);
+const Folder = mongoose.model("Folder", folderSchema);
 
 module.exports = Folder;
