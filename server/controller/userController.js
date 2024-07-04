@@ -16,6 +16,37 @@ const generatePassword = () => {
 };
 
 // Controller function to handle user registration
+// const registerUser = async (req, res) => {
+//   try {
+//     // Generate a random 8-digit password
+//     const plainPassword = generatePassword();
+
+//     console.log(req.body.email, req.body.username);
+
+//     // Send the email with the generated password
+//     await sendAccountUpdateEmail(
+//       req.body.email,
+//       "Account Registration",
+//       plainPassword
+//     );
+
+//     // Hash the generated password
+//     const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+//     // Create a new user with the hashed password
+//     const newUser = await User.create({
+//       ...req.body,
+//       password: hashedPassword,
+//     });
+
+//     res.status(201).json({
+//       message: "Email has been sent. Please verify your account.",
+//       user: newUser,
+//     });
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// };
 const registerUser = async (req, res) => {
   try {
     // Generate a random 8-digit password
@@ -23,23 +54,30 @@ const registerUser = async (req, res) => {
 
     console.log(req.body.email, req.body.username);
 
-    // Send the email with the generated password
+    // Check for existing email before creating user
+    const existingUser = await User.findOne({ email: req.body.email });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    // Send the email with the generated password (unchanged)
     await sendAccountUpdateEmail(
       req.body.email,
       "Account Registration",
       plainPassword
     );
 
-    // Hash the generated password
+    // Hash the generated password (unchanged)
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-    // Create a new user with the hashed password
+    // Create a new user with the hashed password (unchanged)
     const newUser = await User.create({
       ...req.body,
       password: hashedPassword,
     });
 
-    res.status(201).json({
+    res.status(200).json({
       message: "Email has been sent. Please verify your account.",
       user: newUser,
     });
@@ -111,4 +149,37 @@ const logout = async (req, res) => {
     .send("User has been logged out!");
 };
 
-module.exports = { registerUser, deleteUserById, getAllUsers, login, logout };
+// Controller function to update user password by ID
+const updatePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user with the hashed new password
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  registerUser,
+  deleteUserById,
+  getAllUsers,
+  login,
+  logout,
+  updatePassword,
+};

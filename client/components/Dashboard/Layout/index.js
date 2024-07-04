@@ -1,23 +1,32 @@
+import React, { useState } from "react";
 import { Layout, Menu, Button, Dropdown } from "antd";
 import Sidebar from "../Sidebar";
-import { useState } from "react";
-import { HomeOutlined, SettingOutlined } from "@ant-design/icons";
 import { useUser } from "../../utilis/userContext";
+import ProfileUpdateModal from "./ProfileUpdateModal";
+import { HomeOutlined, SettingOutlined } from "@ant-design/icons";
+
 const { Header, Content } = Layout;
 
 const DashboardLayout = ({ children }) => {
-  const { currentUser, isAuthenticated } = useUser();
+  const { currentUser } = useUser();
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [profileUpdateVisible, setProfileUpdateVisible] = useState(false);
 
   const handleDropdownVisibleChange = (visible) => {
     setDropdownVisible(visible);
   };
 
-  console.log("value: ", isAuthenticated);
-
   const menu = (
     <Menu>
-      <Menu.Item key="1">Profile Update</Menu.Item>
+      <Menu.Item
+        key="1"
+        onClick={() => {
+          setDropdownVisible(false);
+          setProfileUpdateVisible(true);
+        }}
+      >
+        Profile Update
+      </Menu.Item>
       <Menu.Item key="2">Documentation</Menu.Item>
     </Menu>
   );
@@ -34,7 +43,6 @@ const DashboardLayout = ({ children }) => {
             style={{ gap: "870px", marginTop: "10px", marginRight: "100px" }}
             className="container mx-auto px-4 flex  items-center"
           >
-            {/* <Button /> */}
             <Button
               style={{ marginRight: "20px" }}
               type="link"
@@ -58,9 +66,13 @@ const DashboardLayout = ({ children }) => {
             </div>
           </div>
         </Header>
-        {/*  className="mt-16 p-4" */}
         <Content style={{ backgroundColor: "white" }}>{children}</Content>
       </Layout>
+      <ProfileUpdateModal
+        visible={profileUpdateVisible}
+        onCancel={() => setProfileUpdateVisible(false)}
+        userId={currentUser ? currentUser._id : null}
+      />
     </Layout>
   );
 };

@@ -12,6 +12,8 @@ const Signup = () => {
   const [username, setUsername] = useState("");
   const [emailError, setEmailError] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisibleR, setIsModalVisibleR] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
   const router = useRouter();
 
   const validateEmail = (email) => {
@@ -25,21 +27,32 @@ const Signup = () => {
       setEmailError("Please enter a valid email address.");
     } else {
       setEmailError("");
+      setRegisterLoading(true);
 
       try {
         const response = await Register(username, email);
 
-        console.log("Registration successful:", response);
-        if (response) {
+        console.log("Registration response:", response);
+        if (
+          response &&
+          response.message ===
+            "Email has been sent. Please verify your account."
+        ) {
+          setIsModalVisible(true);
+          setRegisterLoading(false);
           setEmail("");
           setUsername("");
-          setIsModalVisible(true);
-          router.push("/login");
+        } else {
+          setIsModalVisible(false);
+          setRegisterLoading(false);
+          router.push("/");
         }
       } catch (err) {
-        console.log(err);
+        console.error("Registration failed:", err);
+        setIsModalVisibleR(true);
+        setRegisterLoading(false);
+        // router.push("/");
       }
-      // console.log({ email, username });
     }
   };
 
@@ -76,6 +89,7 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={registerLoading}
             />
             {emailError && (
               <p className="text-red-500 text-sm mt-1">{emailError}</p>
@@ -95,13 +109,15 @@ const Signup = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              disabled={registerLoading}
             />
           </div>
           <button
             type="submit"
             className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:bg-purple-700 mt-4"
+            disabled={registerLoading}
           >
-            Register
+            {registerLoading ? "Registering..." : "Register"}
           </button>
         </form>
         <p className="mt-4 text-center">
@@ -114,10 +130,30 @@ const Signup = () => {
       <Modal
         title="Registration Successful"
         visible={isModalVisible}
-        onOk={() => setIsModalVisible(false)}
-        onCancel={() => setIsModalVisible(false)}
+        onOk={() => {
+          setIsModalVisible(false);
+          router.push("/login");
+        }}
+        onCancel={() => {
+          setIsModalVisible(false);
+          router.push("/login");
+        }}
       >
-        <p>Email has been successfully sent.</p>
+        <p>Email has been successfully sent. Please verify your account.</p>
+      </Modal>
+      <Modal
+        title="Registration Failed!"
+        visible={isModalVisibleR}
+        onOk={() => {
+          setIsModalVisibleR(false);
+          router.push("/");
+        }}
+        onCancel={() => {
+          setIsModalVisibleR(false);
+          router.push("/");
+        }}
+      >
+        <p>Trt Again Later! maybe invalid credentials or bad network!.</p>
       </Modal>
     </div>
   );
