@@ -20,6 +20,10 @@ const folderSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  status: {
+    type: String,
+    require: false,
+  },
 });
 
 const Folder = mongoose.model("Folder", folderSchema);

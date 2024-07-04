@@ -1,5 +1,6 @@
 const axios = require("axios");
 const Analysis = require("../model/BulkAnalysis");
+const Folder = require("../model/Folder");
 
 const performBulkAnalysis = async (req, res) => {
   const { folderId, urls } = req.body;
@@ -17,7 +18,18 @@ const performBulkAnalysis = async (req, res) => {
       folderId,
       analysis: analysisResults,
     });
+    const folder = await Folder.findById(folderId);
 
+    // Check if folder exists
+    if (!folder) {
+      return res.status(404).send({ message: "Folder not found" });
+    }
+
+    // Update the status field to true
+    folder.status = true;
+
+    // Save the updated folder
+    await folder.save();
     await newAnalysis.save();
 
     res.status(201).json(newAnalysis);
