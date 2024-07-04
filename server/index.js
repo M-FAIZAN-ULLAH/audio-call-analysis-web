@@ -9,6 +9,7 @@ const CookieParser = require("cookie-parser");
 const analysisRoutes = require("./routes/analysisRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bulkAnalysisRoutes = require("./routes/bulkAnalysisRoutes");
+const bulk = require("./routes/bulkRoutes");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -32,6 +33,7 @@ connectDB();
 app.use("/api", userRoutes);
 app.use("/api", analysisRoutes);
 app.use("/api", bulkAnalysisRoutes);
+app.use("/api", bulk);
 
 // Start the server
 const port = process.env.PORT || 5000;
