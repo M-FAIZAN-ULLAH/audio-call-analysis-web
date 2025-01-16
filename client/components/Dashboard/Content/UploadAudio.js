@@ -106,7 +106,7 @@ const UploadAudio = () => {
         {isDragActive ? (
           <p>Drop the audio file here...</p>
         ) : (
-          <p>Drag 'n' drop an audio file here, or click to select one</p>
+          <p>Drag and drop an audio file here or click to select one</p>
         )}
       </div>
       {error && <p className="text-red-500 mt-2">{error}</p>}
