@@ -23,3 +23,5 @@ pip install -r requirements.txt
 (enter-command)
 
 python app.py
+
+Python 3.12.8

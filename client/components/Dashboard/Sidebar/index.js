@@ -266,14 +266,14 @@ const Sidebar = () => {
         </Menu.Item>
         <div style={{ marginTop: "10px" }}></div>
         <div style={{ marginTop: "10px" }}></div>
-        <Menu.Item
+        {/* <Menu.Item
           style={{ color: selectedKey === "4" ? "black" : "white" }}
           key="4"
           icon={<NotificationOutlined />}
         >
           History
-        </Menu.Item>
-        <div style={{ marginTop: "10px" }}></div>
+        </Menu.Item> */}
+        <div style={{ marginTop: "50px" }}></div>
         {/* <Menu.Item
           icon={<LogoutOutlined />}
           style={{

@@ -13,6 +13,7 @@ import {
 import { GetAudioUrl } from "../../../utilis/get-audio-url";
 import { useUser } from "../../../utilis/userContext";
 import { useRouter } from "next/router";
+import EmotionChart from "../EmotionAnalysisChart";
 
 const FolderManager = () => {
   const { currentUser, isAuthenticated } = useUser();
@@ -404,7 +405,8 @@ const FolderManager = () => {
         width={800}
       >
         {analysisResults ? (
-          <pre>{JSON.stringify(analysisResults, null, 2)}</pre>
+          // Pass analysisResults as a JSON string to EmotionChart
+          <EmotionChart analysisResults={JSON.stringify(analysisResults)} />
         ) : (
           <Spin size="large" />
         )}

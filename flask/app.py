@@ -5,6 +5,7 @@ from hume import HumeBatchClient
 from hume.models.config import ProsodyConfig
 import json
 
+
 # Create a Flask application
 app = Flask(__name__)
 
@@ -22,7 +23,7 @@ def process_mp3(file_path):
         # Initialize the Hume client
         client = HumeBatchClient(HUME_API_KEY)
 
-        # Define the Hume config for processing the MP3 file
+        # Define the Hume config for processing the MP3, MP4 file
         config = ProsodyConfig()
 
         # Submit the MP3 file to Hume for processing
