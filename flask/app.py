@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-HUME_API_KEY = "pzzjXShj4CFRCd2mzFjoAM2Mdq5cGyYuRyGGHR3CJE4tSBsr"
+HUME_API_KEY = "your Api Key"
 
 
 def process_mp3(file_path):
