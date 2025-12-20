@@ -211,97 +211,67 @@ const Sidebar = () => {
     <Sider
       breakpoint="lg"
       collapsedWidth="0"
+      width={256}
       style={{
         height: "100vh",
         position: "fixed",
         left: 0,
         top: 0,
-        backgroundColor: "white",
+        backgroundColor: "#1f2937",
+        zIndex: 1000,
       }}
+      className="hidden lg:block"
     >
-      <Menu
-        style={{
-          marginTop: "10px",
-          marginLeft: "30px",
-          height: "725px",
-          justifyContent: "center",
-          width: "250px",
-          backgroundColor: "black",
-          gap: "40px",
-        }}
-        theme="light"
-        mode="inline"
-        selectedKeys={[selectedKey]}
-        onClick={handleClick}
-      >
+      <div className="flex flex-col h-full">
         <div
-          className="logo"
+          className="logo px-4 py-6"
           style={{
             color: "white",
             textAlign: "center",
-            marginTop: "50px",
-            marginRight: "30px",
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          Audio Call Analysis System
+          <div className="text-lg font-bold">Audio Insights</div>
+          <div className="text-xs text-gray-400 mt-1">Analysis System</div>
         </div>
-        <hr style={{ marginTop: "30px" }}></hr>
-        <Menu.Item
+        <Menu
           style={{
-            color: selectedKey === "1" ? "black" : "white",
-            marginTop: "70px",
+            flex: 1,
+            backgroundColor: "#1f2937",
+            border: "none",
           }}
-          key="1"
-          icon={<HomeOutlined />}
+          theme="dark"
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          onClick={handleClick}
+          className="px-2"
         >
-          Dashboard
-        </Menu.Item>
-        <div style={{ marginTop: "10px" }}></div>
-        <Menu.Item
-          style={{ color: selectedKey === "2" ? "black" : "white" }}
-          key="2"
-          icon={<UserOutlined />}
-        >
-          Bulk Analysis
-        </Menu.Item>
-        <div style={{ marginTop: "10px" }}></div>
-        <div style={{ marginTop: "10px" }}></div>
-        {/* <Menu.Item
-          style={{ color: selectedKey === "4" ? "black" : "white" }}
-          key="4"
-          icon={<NotificationOutlined />}
-        >
-          History
-        </Menu.Item> */}
-        <div style={{ marginTop: "50px" }}></div>
-        {/* <Menu.Item
-          icon={<LogoutOutlined />}
-          style={{
-            marginBottom: "30px",
-            marginLeft: "35px",
-            position: "absolute",
-            bottom: 0,
-            width: "80%",
-            color: "white",
-          }}
-        >
-          Logout
-        </Menu.Item> */}
-        <Button
-          onClick={(e) => {
-            handleLogout();
-          }}
-          style={{
-            color: "black",
-            fontWeight: "600",
-            width: "180px",
-            marginTop: "370px",
-            marginLeft: "30px",
-          }}
-        >
-          Logout
-        </Button>
-      </Menu>
+          <Menu.Item
+            key="1"
+            icon={<HomeOutlined />}
+            className="mt-4"
+          >
+            Dashboard
+          </Menu.Item>
+          <Menu.Item
+            key="2"
+            icon={<UserOutlined />}
+          >
+            Bulk Analysis
+          </Menu.Item>
+        </Menu>
+        <div className="px-4 pb-4 border-t border-gray-700">
+          <Button
+            onClick={handleLogout}
+            danger
+            icon={<LogoutOutlined />}
+            block
+            className="mt-4"
+          >
+            Logout
+          </Button>
+        </div>
+      </div>
     </Sider>
   );
 };

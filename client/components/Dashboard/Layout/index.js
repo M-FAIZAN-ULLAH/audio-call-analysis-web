@@ -32,27 +32,23 @@ const DashboardLayout = ({ children }) => {
   );
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ minHeight: "100vh", backgroundColor: "#f5f5f5" }}>
       <Sidebar />
-      <Layout className="ml-64">
-        <Header
-          style={{ marginTop: "20px", marginLeft: "32px", width: "1235px" }}
-          className="bg-white shadow-md z-10 fixed w-full"
-        >
-          <div
-            style={{ gap: "870px", marginTop: "10px", marginRight: "100px" }}
-            className="container mx-auto px-4 flex  items-center"
-          >
+      <Layout className="lg:ml-64">
+        <Header className="bg-white shadow-md z-10 fixed w-full lg:w-auto lg:left-64">
+          <div className="container mx-auto px-4 lg:px-6 flex items-center justify-between h-full">
             <Button
-              style={{ marginRight: "20px" }}
               type="link"
               icon={<HomeOutlined />}
+              className="text-base"
             >
               {currentUser ? (
-                <span>Welcome! {currentUser.username}</span>
+                <span className="hidden sm:inline">
+                  Welcome! {currentUser.username}
+                </span>
               ) : null}
             </Button>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Dropdown
                 overlay={menu}
                 trigger={["click"]}
@@ -60,13 +56,18 @@ const DashboardLayout = ({ children }) => {
                 onVisibleChange={handleDropdownVisibleChange}
               >
                 <Button type="text" icon={<SettingOutlined />}>
-                  Settings
+                  <span className="hidden sm:inline">Settings</span>
                 </Button>
               </Dropdown>
             </div>
           </div>
         </Header>
-        <Content style={{ backgroundColor: "white" }}>{children}</Content>
+        <Content
+          className="mt-16 lg:mt-20"
+          style={{ backgroundColor: "transparent", minHeight: "calc(100vh - 80px)" }}
+        >
+          {children}
+        </Content>
       </Layout>
       <ProfileUpdateModal
         visible={profileUpdateVisible}

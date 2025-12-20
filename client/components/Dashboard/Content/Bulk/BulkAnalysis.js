@@ -6,10 +6,8 @@ import FolderManager from './FolderManager';
 const BulkAnalysis = () => {
   return (
     <DashboardLayout>
-      <div style={{ marginTop: "100px", marginLeft: "30px", backgroundColor: "white", height: "620px", width: "1220px" }}>
-        <div style={{ marginTop: "20px" }}>
-          <FolderManager />
-        </div>
+      <div className="w-full">
+        <FolderManager />
       </div>
     </DashboardLayout>
   );

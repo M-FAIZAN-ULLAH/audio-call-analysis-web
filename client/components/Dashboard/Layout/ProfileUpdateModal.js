@@ -15,7 +15,7 @@ const ProfileUpdateModal = ({ visible, onCancel, userId }) => {
       const { newPassword } = values;
 
       await axios.put(
-        `http://localhost:5000/api/users/${userId}/update-password`,
+        `http://localhost:3001/api/users/${userId}/update-password`,
         {
           newPassword,
         }
