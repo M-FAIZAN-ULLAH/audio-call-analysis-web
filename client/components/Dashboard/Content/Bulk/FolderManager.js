@@ -36,6 +36,7 @@ import { GetAudioUrl } from "../../../utilis/get-audio-url";
 import { useUser } from "../../../utilis/userContext";
 import { useRouter } from "next/router";
 import EmotionChart from "../EmotionAnalysisChart";
+import AnalysisProgressModal from "./AnalysisProgressModal";
 
 const { Title, Text } = Typography;
 
@@ -60,6 +61,10 @@ const FolderManager = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const [fetchingFolders, setFetchingFolders] = useState(false);
+  const [progressVisible, setProgressVisible] = useState(false);
+  const [progressCurrentFile, setProgressCurrentFile] = useState(0);
+  const [progressTotalFiles, setProgressTotalFiles] = useState(0);
+  const [progressFileName, setProgressFileName] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -264,23 +269,98 @@ const FolderManager = () => {
         return;
       }
       const urls = selectedFolder.audioFiles.map((file) => file.url);
+      const files = selectedFolder.audioFiles;
+      
+      // Show progress modal
+      setProgressTotalFiles(urls.length);
+      setProgressCurrentFile(0);
+      setProgressVisible(true);
       setLoading(true);
+      
+      // Simulate progress updates (since server processes sequentially)
+      // Estimate: each file takes ~30-60 seconds on average
+      let progressInterval;
+      let currentProgress = 0;
+      const estimatedTimePerFile = 45000; // 45 seconds per file (conservative estimate)
+      const totalEstimatedTime = urls.length * estimatedTimePerFile;
+      const updateInterval = 2000; // Update every 2 seconds
+      const progressIncrement = (updateInterval / totalEstimatedTime) * urls.length;
+      
+      const updateProgress = () => {
+        currentProgress += progressIncrement;
+        const fileNumber = Math.min(Math.floor(currentProgress) + 1, urls.length);
+        
+        if (fileNumber <= urls.length) {
+          setProgressCurrentFile(fileNumber);
+          if (fileNumber <= files.length) {
+            const currentFile = files[fileNumber - 1];
+            if (currentFile) {
+              setProgressFileName(currentFile.fileName || `File ${fileNumber}`);
+            }
+          }
+        }
+        
+        // Stop if we've reached the end
+        if (fileNumber >= urls.length) {
+          if (progressInterval) {
+            clearInterval(progressInterval);
+          }
+        }
+      };
+      
+      // Start progress simulation
+      // Note: This is an estimate. Real progress would require WebSocket or polling
+      progressInterval = setInterval(updateProgress, updateInterval);
+      
+      // Set initial file
+      if (files.length > 0) {
+        setProgressFileName(files[0].fileName || "File 1");
+      }
+      setProgressCurrentFile(1);
+      
       try {
         const response = await axios.post(
           "http://localhost:3001/api/bulk-analysis",
           {
             folderId: selectedFolder._id,
             urls: urls,
+          },
+          {
+            timeout: 1800000, // 30 minutes timeout for bulk analysis
           }
         );
+        
+        // Clear progress interval
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
+        
+        // Set final progress
+        setProgressCurrentFile(urls.length);
+        setProgressFileName("");
+        
+        // Wait a moment to show completion
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        
         setAnalysisResults(response.data.analysis);
-        message.success("Analysis completed successfully!");
+        setProgressVisible(false);
+        message.success(`Analysis completed successfully! Processed ${urls.length} files.`);
         await handleFetchFolders();
       } catch (error) {
         console.error("Error performing bulk analysis:", error);
+        
+        // Clear progress interval
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
+        
+        setProgressVisible(false);
         message.error("Failed to perform analysis!");
       } finally {
         setLoading(false);
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
       }
     }
   };
@@ -895,6 +975,14 @@ const FolderManager = () => {
             </div>
           )}
         </Modal>
+
+        {/* Analysis Progress Modal */}
+        <AnalysisProgressModal
+          open={progressVisible}
+          totalFiles={progressTotalFiles}
+          currentFile={progressCurrentFile}
+          fileName={progressFileName}
+        />
       </div>
     </div>
   );
