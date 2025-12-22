@@ -13,6 +13,7 @@ const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated) {
       router.push("/login"); // Redirect to login page if not authenticated
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return children;

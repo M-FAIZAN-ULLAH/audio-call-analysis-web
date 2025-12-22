@@ -64,6 +64,7 @@ const FolderManager = () => {
 
   useEffect(() => {
     handleFetchFolders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCreateFolder = async () => {
@@ -679,7 +680,7 @@ const FolderManager = () => {
                           No files uploaded yet
                         </div>
                         <Text type="secondary" className="text-sm">
-                          Click "Upload Files" to add audio files to this folder
+                          Click &quot;Upload Files&quot; to add audio files to this folder
                         </Text>
                       </div>
                     }
@@ -759,8 +760,8 @@ const FolderManager = () => {
           cancelText="Cancel"
         >
           <p className="text-base">
-            Are you sure you want to delete the folder "
-            <strong>{selectedFolder?.name}</strong>"? This action cannot be
+            Are you sure you want to delete the folder &quot;
+            <strong>{selectedFolder?.name}</strong>&quot;? This action cannot be
             undone and will delete all files in this folder.
           </p>
         </Modal>

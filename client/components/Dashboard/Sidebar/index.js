@@ -178,6 +178,7 @@ const Sidebar = () => {
         break;
     }
     setSelectedKey(key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleClick = (e) => {
