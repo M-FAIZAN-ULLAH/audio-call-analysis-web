@@ -15,6 +15,9 @@ const { Title, Text } = Typography;
 const AnalysisProgressModal = ({ open, totalFiles, currentFile, fileName }) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [rotation, setRotation] = useState(0);
+  const [pulseScale, setPulseScale] = useState(1);
+  const [waveOffset, setWaveOffset] = useState(0);
+  const [particleRotation, setParticleRotation] = useState(0);
 
   // Creative messages that change during processing
   const processingMessages = [
@@ -60,12 +63,48 @@ const AnalysisProgressModal = ({ open, totalFiles, currentFile, fileName }) => {
     return () => clearInterval(interval);
   }, [open]);
 
-  // Rotate spinner
+  // Rotate spinner continuously
   useEffect(() => {
     if (!open) return;
     
     const interval = setInterval(() => {
       setRotation((prev) => prev + 15);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [open]);
+
+  // Pulse animation
+  useEffect(() => {
+    if (!open) return;
+    
+    const interval = setInterval(() => {
+      setPulseScale((prev) => {
+        if (prev >= 1.2) return 0.9;
+        return prev + 0.02;
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [open]);
+
+  // Wave animation
+  useEffect(() => {
+    if (!open) return;
+    
+    const interval = setInterval(() => {
+      setWaveOffset((prev) => (prev + 2) % 360);
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [open]);
+
+  // Particle rotation
+  useEffect(() => {
+    if (!open) return;
+    
+    const interval = setInterval(() => {
+      setParticleRotation((prev) => (prev + 5) % 360);
     }, 100);
 
     return () => clearInterval(interval);
@@ -82,9 +121,10 @@ const AnalysisProgressModal = ({ open, totalFiles, currentFile, fileName }) => {
       maskClosable={false}
     >
       <div className="p-6">
-        {/* Header */}
+        {/* Header with enhanced animations */}
         <div className="text-center mb-6">
           <div className="relative inline-block mb-4">
+            {/* Rotating background spinner */}
             <div
               className="absolute inset-0 flex items-center justify-center"
               style={{
@@ -94,11 +134,59 @@ const AnalysisProgressModal = ({ open, totalFiles, currentFile, fileName }) => {
             >
               <FaSpinner className="text-6xl text-blue-500 opacity-20" />
             </div>
+            {/* Pulsing particles around the main icon */}
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute"
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: `hsl(${(i * 45 + particleRotation) % 360}, 70%, 60%)`,
+                  left: '50%',
+                  top: '50%',
+                  transform: `translate(-50%, -50%) rotate(${i * 45}deg) translateY(-60px) rotate(${-i * 45}deg)`,
+                  animation: 'pulse 2s ease-in-out infinite',
+                  animationDelay: `${i * 0.2}s`,
+                  opacity: 0.6,
+                }}
+              />
+            ))}
+            {/* Main icon with pulse */}
             <div className="relative">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                <FaWaveSquare className="text-4xl text-white animate-pulse" />
+              <div 
+                className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
+                style={{
+                  transform: `scale(${pulseScale})`,
+                  transition: "transform 0.05s ease-out",
+                  boxShadow: `0 0 ${20 + Math.sin(Date.now() / 200) * 10}px rgba(59, 130, 246, 0.5)`,
+                }}
+              >
+                <FaWaveSquare 
+                  className="text-4xl text-white" 
+                  style={{
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                  }}
+                />
               </div>
             </div>
+            {/* Animated wave rings */}
+            {[1, 2, 3].map((ring) => (
+              <div
+                key={ring}
+                className="absolute inset-0 rounded-full border-2 border-blue-400"
+                style={{
+                  left: `${-ring * 10}px`,
+                  top: `${-ring * 10}px`,
+                  right: `${-ring * 10}px`,
+                  bottom: `${-ring * 10}px`,
+                  opacity: 0.3 - (ring * 0.1),
+                  animation: `ripple ${2 + ring * 0.5}s ease-out infinite`,
+                  animationDelay: `${ring * 0.3}s`,
+                }}
+              />
+            ))}
           </div>
           <Title level={3} className="mb-2">
             Processing Audio Analysis
@@ -155,29 +243,55 @@ const AnalysisProgressModal = ({ open, totalFiles, currentFile, fileName }) => {
           </Card>
         )}
 
-        {/* Dynamic Message Section */}
+        {/* Dynamic Message Section with enhanced animation */}
         <Card className="shadow-sm border-0 bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="flex items-center justify-center gap-4 py-4">
             <div
-              className="text-3xl transition-all duration-500"
+              className="text-3xl transition-all duration-500 relative"
               style={{
-                transform: `scale(${1 + Math.sin(Date.now() / 500) * 0.1})`,
+                transform: `scale(${1 + Math.sin(Date.now() / 500) * 0.15}) rotate(${Math.sin(Date.now() / 300) * 10}deg)`,
+                filter: `drop-shadow(0 0 ${5 + Math.sin(Date.now() / 400) * 3}px ${currentMessage.color === 'blue' ? 'rgba(59, 130, 246, 0.5)' : currentMessage.color === 'purple' ? 'rgba(147, 51, 234, 0.5)' : 'rgba(34, 197, 94, 0.5)'})`,
               }}
             >
               {currentMessage.icon}
+              {/* Glowing effect */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: `radial-gradient(circle, ${currentMessage.color === 'blue' ? 'rgba(59, 130, 246, 0.3)' : currentMessage.color === 'purple' ? 'rgba(147, 51, 234, 0.3)' : 'rgba(34, 197, 94, 0.3)'} 0%, transparent 70%)`,
+                  transform: `scale(${1.5 + Math.sin(Date.now() / 400) * 0.3})`,
+                  animation: 'pulse 2s ease-in-out infinite',
+                }}
+              />
             </div>
             <div className="flex-1">
-              <Text className="text-base font-medium text-gray-700">
+              <Text 
+                className="text-base font-medium text-gray-700"
+                style={{
+                  animation: 'fadeIn 0.5s ease-in',
+                }}
+              >
                 {currentMessage.text}
               </Text>
             </div>
           </div>
         </Card>
 
-        {/* Queue Status */}
+        {/* Queue Status with animated dots */}
         <div className="mt-6 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="flex items-center gap-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 bg-blue-500 rounded-full"
+                  style={{
+                    animation: `bounce 1.4s ease-in-out infinite`,
+                    animationDelay: `${i * 0.2}s`,
+                  }}
+                />
+              ))}
+            </div>
             <Text type="secondary" className="text-sm">
               Files are being processed sequentially in queue
             </Text>
@@ -220,6 +334,24 @@ const AnalysisProgressModal = ({ open, totalFiles, currentFile, fileName }) => {
           </Row>
         </div>
       </div>
+      <style jsx global>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        @keyframes ripple {
+          0% { transform: scale(0.8); opacity: 0.5; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+          0%, 80%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+          40% { transform: translateY(-8px) scale(1.2); opacity: 1; }
+        }
+      `}</style>
     </Modal>
   );
 };

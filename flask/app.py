@@ -10,7 +10,6 @@ import os
 import time
 import re
 
-
 # Create a Flask application
 app = Flask(__name__)
 
@@ -24,31 +23,21 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-# audio call url:  http://res.cloudinary.com/dczyj0axu/video/upload/v1766418213/Fiver/xmoofcn9g4vhp8jcjjpj.mp3
-
-# Use new API key from environment or fallback to new key
-# APIKEY: Mzj1N5sW4Ss8RKll2q9WaGgWJ7K5rwbVUzIMRpo2Qm9ILn8E
-# SECRET-KEY: bjflRKJqk1Crc1IBwgJ2pEkC98gGUkcZiUc7UtwEKGtQLnv3mDQdqmi9n3pi8R0X
-HUME_API_KEY = os.getenv('HUME_API_KEY', 'Mzj1N5sW4Ss8RKll2q9WaGgWJ7K5rwbVUzIMRpo2Qm9ILn8E')
+# Use API key from environment or fallback
+HUME_API_KEY = os.getenv('HUME_API_KEY', 'CirCEvEsqm8cRAAHhyMcJGub6elwD7JtPLYHAWgqDkrFJHsA')
 
 
 def poll_job_status(client, job_id, max_wait_time=1800, poll_interval=10):
     """
     Poll job status until completion or timeout.
     Uses download_predictions as the most reliable way to check completion.
-    
-    Args:
-        client: HumeBatchClient instance
-        job_id: Job ID to poll
-        max_wait_time: Maximum time to wait in seconds (default: 30 minutes)
-        poll_interval: Time between polls in seconds (default: 10 seconds)
-    
-    Returns:
-        BatchJob object if completed, None if timeout
+    Enhanced with test.py logic for better reliability.
     """
     start_time = time.time()
     attempt = 0
     temp_file = f"temp_predictions_{job_id}.json"
+    
+    logging.info(f"[AUDIO PROCESSING] Starting to poll job status - Job ID: {job_id}, Max wait: {max_wait_time}s")
     
     while time.time() - start_time < max_wait_time:
         try:
@@ -68,13 +57,14 @@ def poll_job_status(client, job_id, max_wait_time=1800, poll_interval=10):
                 if os.path.exists(temp_file):
                     with open(temp_file, 'r') as f:
                         content = f.read().strip()
+                        
                         # Check if it's an error message
                         if content.startswith('{') and '"message"' in content:
                             try:
                                 error_data = json.loads(content)
-                                if 'message' in error_data and 'status' in error_data:
-                                    # This is an error response, not predictions
+                                if 'message' in error_data:
                                     error_msg = error_data.get('message', '').lower()
+                                    
                                     if 'in progress' in error_msg or 'processing' in error_msg:
                                         logging.info(f"[AUDIO PROCESSING] Job {job_id} still processing (got: {error_data.get('message')})... (attempt {attempt})")
                                         os.remove(temp_file)  # Clean up error file
@@ -89,7 +79,9 @@ def poll_job_status(client, job_id, max_wait_time=1800, poll_interval=10):
                 if os.path.exists(temp_file):
                     file_size = os.path.getsize(temp_file)
                     if file_size > 100:  # Reasonable size for predictions
+                        elapsed_total = int(time.time() - start_time)
                         logging.info(f"[AUDIO PROCESSING] Job {job_id} is complete! Downloaded predictions successfully.")
+                        
                         # Clean up temp file
                         os.remove(temp_file)
                         return job
@@ -150,13 +142,17 @@ def poll_job_status(client, job_id, max_wait_time=1800, poll_interval=10):
 def process_mp3(file_path):
     """
     Process audio file using Hume Batch API with ProsodyConfig.
+    Enhanced with test.py logic for better reliability.
     Returns standardized format for consistent results.
     """
     try:
         logging.info(f"[AUDIO PROCESSING] Starting audio analysis - URL: {file_path}")
         
-        # Initialize the Hume client with new API key
-        client = HumeBatchClient(HUME_API_KEY)
+        # Initialize the Hume client with API key
+        try:
+            client = HumeBatchClient(HUME_API_KEY)
+        except Exception as client_error:
+            raise Exception(f"Failed to initialize Hume client: {str(client_error)}")
 
         # Define the Hume config for processing audio files (MP3, MP4, WAV, etc.)
         config = ProsodyConfig()
@@ -240,98 +236,57 @@ def process_mp3(file_path):
 
         # Download the predictions
         predictions_file = "predictions.json"
+        logging.info(f"[AUDIO PROCESSING] Downloading predictions to {predictions_file}...")
         job.download_predictions(predictions_file)
+        logging.info(f"[AUDIO PROCESSING] Predictions downloaded successfully")
 
         # Read and parse predictions
         with open(predictions_file, "r") as file:
             predictions = json.load(file)
 
+        # Clean up predictions file
+        try:
+            os.remove(predictions_file)
+            logging.info(f"[AUDIO PROCESSING] Cleaned up temporary file: {predictions_file}")
+        except Exception as cleanup_error:
+            logging.warning(f"[AUDIO PROCESSING] Could not remove temp file: {cleanup_error}")
+
         # Return the original Hume format (array format) that Node.js expects
         # This is the format: [{"source": {...}, "results": {"predictions": [...]}}]
         # Node.js formatData function handles this format correctly
         logging.info(f"[AUDIO PROCESSING] Successfully processed audio - URL: {file_path}")
+        logging.info(f"[AUDIO PROCESSING] Predictions type: {type(predictions)}, Length: {len(predictions) if isinstance(predictions, (list, dict)) else 'N/A'}")
+        
+        # Validate predictions structure (from test.py logic)
+        if isinstance(predictions, list) and len(predictions) > 0:
+            result = predictions[0]
+            if 'results' in result and 'predictions' in result['results']:
+                logging.info(f"[AUDIO PROCESSING] Predictions structure validated - contains results and predictions")
         
         # Return predictions in original Hume format (array)
         # This matches what Node.js expects in formatData function
         # Format: [{"source": {...}, "results": {"predictions": [...]}}]
         if isinstance(predictions, list):
+            logging.info(f"[AUDIO PROCESSING] Returning predictions as list with {len(predictions)} items")
             return predictions
         elif isinstance(predictions, dict):
             # If it's a dict, wrap it in an array to match expected format
+            logging.info(f"[AUDIO PROCESSING] Wrapping dict predictions in array")
             return [predictions]
         else:
+            logging.warning(f"[AUDIO PROCESSING] Unexpected predictions type: {type(predictions)}")
+            # Return as-is, but log warning
             return predictions
 
     except Exception as e:
-        logging.error(f"[AUDIO PROCESSING] Error processing file: {str(e)} - URL: {file_path}")
+        error_msg = str(e)
+        logging.error(f"[AUDIO PROCESSING] Error processing file: {error_msg} - URL: {file_path}")
+        
         return {
             'success': False,
-            'error': str(e),
-            'message': f'Error processing file: {str(e)}',
+            'error': error_msg,
+            'message': f'Error processing file: {error_msg}',
             'results': None
-        }
-
-
-def standardize_predictions(predictions, file_url):
-    """
-    Standardize predictions format to ensure consistent structure.
-    Handles both single file and batch results.
-    """
-    try:
-        # Handle array format (batch results)
-        if isinstance(predictions, list) and len(predictions) > 0:
-            # Extract first result if it's a batch
-            result_data = predictions[0]
-        else:
-            result_data = predictions
-
-        # Standardized response structure
-        standardized = {
-            'success': True,
-            'file_url': file_url,
-            'results': result_data.get('results', result_data) if isinstance(result_data, dict) else result_data,
-            'predictions': None,
-            'emotions': [],
-            'text': []
-        }
-
-        # Extract predictions if available
-        if isinstance(result_data, dict) and 'results' in result_data:
-            results = result_data['results']
-            if results and 'predictions' in results and len(results['predictions']) > 0:
-                prediction = results['predictions'][0]
-                standardized['predictions'] = prediction
-                
-                # Extract prosody predictions if available
-                if 'models' in prediction and 'prosody' in prediction['models']:
-                    prosody = prediction['models']['prosody']
-                    if 'grouped_predictions' in prosody and len(prosody['grouped_predictions']) > 0:
-                        grouped = prosody['grouped_predictions'][0]
-                        if 'predictions' in grouped:
-                            standardized['emotions'] = []
-                            standardized['text'] = []
-                            
-                            for pred in grouped['predictions']:
-                                # Extract emotions
-                                if 'emotions' in pred:
-                                    standardized['emotions'].extend(pred['emotions'])
-                                
-                                # Extract text/transcript
-                                if 'text' in pred:
-                                    standardized['text'].append(pred['text'])
-
-        return standardized
-
-    except Exception as e:
-        logging.error(f"[STANDARDIZE] Error standardizing predictions: {str(e)}")
-        # Return original format if standardization fails
-        return {
-            'success': True,
-            'file_url': file_url,
-            'results': predictions,
-            'predictions': None,
-            'emotions': [],
-            'text': []
         }
 
 
@@ -379,7 +334,12 @@ def upload_file():
         # Node.js formatData function will process this correctly
         # Format: [{"source": {...}, "results": {"predictions": [...]}}]
         logging.info(f"[API] POST /upload - Success - Processed audio file")
-        return jsonify(result)
+        logging.info(f"[API] POST /upload - Response type: {type(result)}, Size: {len(str(result))} chars")
+        
+        # Ensure we return JSON
+        response = jsonify(result)
+        logging.info(f"[API] POST /upload - Sending response to client...")
+        return response
 
     except Exception as e:
         logging.error(f"[API] POST /upload - Error: {str(e)}")
@@ -402,14 +362,15 @@ def hello():
         'success': True,
         'message': 'Flask Audio Analysis Server is running',
         'version': '2.0.0',
+        'api_key_configured': bool(HUME_API_KEY),
+        'api_key_prefix': HUME_API_KEY[:10] if HUME_API_KEY else None,
         'endpoints': {
             'health': '/',
+            'test': '/test (POST) - Test Hume API',
             'custom': '/custom',
             'upload': '/upload (POST)'
         }
     })
-
-# Define a route with a custom endpoint
 
 
 @app.route('/custom')
@@ -429,6 +390,78 @@ def custom():
     })
 
 
+@app.route('/test', methods=['POST'])
+def test_hume():
+    """
+    Test endpoint that uses test.py logic to verify Hume API works.
+    Accepts optional 'url' in JSON body, or uses default test URL.
+    """
+    try:
+        # Get test URL from request or use default
+        test_url = None
+        if request.json and 'url' in request.json:
+            test_url = request.json.get('url', '').strip()
+        
+        if not test_url:
+            test_url = "http://res.cloudinary.com/dczyj0axu/video/upload/v1766430541/Fiver/pmqgdztaobs7lyecpfs7.mp3"
+        
+        logging.info(f"[TEST] Starting Hume API test with URL: {test_url}")
+        logging.info(f"[TEST] API Key: {HUME_API_KEY[:10]}...")
+        
+        # Use the same process_mp3 function
+        result = process_mp3(test_url)
+        
+        # Check if result is an error
+        if isinstance(result, dict) and result.get('success') is False:
+            return jsonify({
+                'success': False,
+                'test_status': 'FAILED',
+                'error': result.get('error'),
+                'message': result.get('message'),
+                'url_tested': test_url
+            }), 500
+        
+        # Validate predictions structure (from test.py)
+        validation_result = {
+            'success': True,
+            'test_status': 'PASSED',
+            'url_tested': test_url,
+            'predictions_received': True,
+            'predictions_type': type(result).__name__,
+            'summary': {}
+        }
+        
+        if isinstance(result, list) and len(result) > 0:
+            first_result = result[0]
+            if 'results' in first_result and 'predictions' in first_result['results']:
+                predictions = first_result['results']['predictions']
+                if len(predictions) > 0:
+                    prediction = predictions[0]
+                    if 'models' in prediction and 'prosody' in prediction['models']:
+                        prosody = prediction['models']['prosody']
+                        if 'grouped_predictions' in prosody and len(prosody['grouped_predictions']) > 0:
+                            grouped = prosody['grouped_predictions'][0]
+                            if 'predictions' in grouped:
+                                validation_result['summary'] = {
+                                    'prediction_segments': len(grouped['predictions']),
+                                    'emotions_detected': sum(len(p.get('emotions', [])) for p in grouped['predictions']),
+                                    'text_segments': sum(1 for p in grouped['predictions'] if p.get('text'))
+                                }
+        
+        logging.info(f"[TEST] Test completed successfully!")
+        return jsonify(validation_result)
+        
+    except Exception as e:
+        error_msg = str(e)
+        logging.error(f"[TEST] Test failed with error: {error_msg}")
+        return jsonify({
+            'success': False,
+            'test_status': 'FAILED',
+            'error': error_msg,
+            'message': f'Test failed: {error_msg}'
+        }), 500
+
+
 # Error handlers for consistent error responses
 @app.errorhandler(404)
 def not_found(error):
@@ -443,6 +476,9 @@ def not_found(error):
 @app.errorhandler(500)
 def internal_error(error):
     """Handle 500 errors with consistent format"""
+    import traceback
+    error_trace = traceback.format_exc()
+    logging.error(f"[FLASK] 500 Error: {error_trace}")
     return jsonify({
         'success': False,
         'error': 'Internal Server Error',

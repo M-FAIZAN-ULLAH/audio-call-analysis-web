@@ -178,7 +178,6 @@ const FolderManager = () => {
           { name: file.name, type: file.type, url: url },
         ]);
 
-        await handleFetchFolders();
         message.success(`File "${file.name}" uploaded successfully!`);
       } catch (error) {
         console.error("Error uploading file:", error);
@@ -186,6 +185,10 @@ const FolderManager = () => {
       }
     }
 
+    // Refresh folder data to show newly uploaded files immediately
+    await handleFetchFolders();
+    await refreshSelectedFolder();
+    
     setUploading(false);
     // Reset file input
     event.target.value = "";
@@ -200,6 +203,7 @@ const FolderManager = () => {
       setUploadedFiles(uploadedFiles.filter((file) => file.name !== fileName));
 
       await handleFetchFolders();
+      await refreshSelectedFolder();
 
       message.success(`File "${fileName}" deleted successfully!`);
     } catch (error) {
@@ -345,7 +349,17 @@ const FolderManager = () => {
         setAnalysisResults(response.data.analysis);
         setProgressVisible(false);
         message.success(`Analysis completed successfully! Processed ${urls.length} files.`);
+        
+        // Refresh folder data to get updated status
         await handleFetchFolders();
+        await refreshSelectedFolder();
+        
+        // Automatically open view modal when analysis is complete
+        if (selectedFolder) {
+          setTimeout(async () => {
+            await handleViewFolderDetails(1);
+          }, 500);
+        }
       } catch (error) {
         console.error("Error performing bulk analysis:", error);
         
@@ -369,6 +383,23 @@ const FolderManager = () => {
     setSelectedFolder(folder);
     setUploadedFiles(folder.audioFiles || []);
     setIsSelectModalVisible(false);
+  };
+
+  // Refresh selected folder data
+  const refreshSelectedFolder = async () => {
+    if (selectedFolder) {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/folders/${selectedFolder._id}`
+        );
+        if (response.data.folder) {
+          setSelectedFolder(response.data.folder);
+          setUploadedFiles(response.data.folder.audioFiles || []);
+        }
+      } catch (error) {
+        console.error("Error refreshing folder:", error);
+      }
+    }
   };
 
   const columns = [
@@ -457,7 +488,7 @@ const FolderManager = () => {
           >
             Select Folder
           </Button>
-          {selectedFolder && selectedFolder.status === "true" && (
+          {selectedFolder && (selectedFolder.status === "true" || selectedFolder.status === true) && (
             <Button
               type="primary"
               size="large"
@@ -468,7 +499,7 @@ const FolderManager = () => {
               View Analysis
             </Button>
           )}
-          {selectedFolder && selectedFolder.status !== "true" && (
+          {selectedFolder && selectedFolder.status !== "true" && selectedFolder.status !== true && (
             <Button
               type="primary"
               size="large"
@@ -506,42 +537,45 @@ const FolderManager = () => {
                     hoverable
                     className="h-full cursor-pointer transition-all duration-300 hover:shadow-xl border border-gray-200"
                     onClick={() => handleSelectFolder(folder)}
-                    actions={[
-                      <Tooltip title="Edit Folder Name" key="edit">
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditFolderId(folder._id);
-                            setEditFolderName(folder.name);
-                            setIsEditModalVisible(true);
-                          }}
-                          className="flex items-center justify-center h-full py-2 hover:bg-blue-50 transition-colors cursor-pointer"
-                        >
-                          <FaEdit className="text-blue-600 text-lg" />
-                        </div>
-                      </Tooltip>,
-                      <Tooltip title="Delete Folder" key="delete">
-                        <Popconfirm
-                          title="Delete folder?"
-                          description="This will permanently delete the folder and all its files."
-                          onConfirm={(e) => {
-                            e?.stopPropagation();
-                            setSelectedFolder(folder);
-                            setIsDeleteModalVisible(true);
-                          }}
-                          okText="Delete"
-                          cancelText="Cancel"
-                          okButtonProps={{ danger: true }}
-                        >
+                    actions={
+                      // Only show actions when no folder is selected (to avoid duplicates)
+                      !selectedFolder ? [
+                        <Tooltip title="Edit Folder Name" key="edit">
                           <div
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center justify-center h-full py-2 hover:bg-red-50 transition-colors cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditFolderId(folder._id);
+                              setEditFolderName(folder.name);
+                              setIsEditModalVisible(true);
+                            }}
+                            className="flex items-center justify-center h-full py-2 hover:bg-blue-50 transition-colors cursor-pointer"
                           >
-                            <FaTrashAlt className="text-red-600 text-lg" />
+                            <FaEdit className="text-blue-600 text-lg" />
                           </div>
-                        </Popconfirm>
-                      </Tooltip>,
-                    ]}
+                        </Tooltip>,
+                        <Tooltip title="Delete Folder" key="delete">
+                          <Popconfirm
+                            title="Delete folder?"
+                            description="This will permanently delete the folder and all its files."
+                            onConfirm={(e) => {
+                              e?.stopPropagation();
+                              setSelectedFolder(folder);
+                              setIsDeleteModalVisible(true);
+                            }}
+                            okText="Delete"
+                            cancelText="Cancel"
+                            okButtonProps={{ danger: true }}
+                          >
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex items-center justify-center h-full py-2 hover:bg-red-50 transition-colors cursor-pointer"
+                            >
+                              <FaTrashAlt className="text-red-600 text-lg" />
+                            </div>
+                          </Popconfirm>
+                        </Tooltip>,
+                      ] : []
+                    }
                   >
                     <div className="flex items-start gap-4">
                       <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm flex-shrink-0">
@@ -630,9 +664,7 @@ const FolderManager = () => {
                         setEditFolderName(selectedFolder.name);
                         setIsEditModalVisible(true);
                       }}
-                      className="flex items-center gap-2"
                     >
-                      <FaEdit />
                       <span className="hidden sm:inline">Rename</span>
                     </Button>
                   </Tooltip>
@@ -648,9 +680,7 @@ const FolderManager = () => {
                       <Button
                         danger
                         icon={<FaTrashAlt />}
-                        className="flex items-center gap-2"
                       >
-                        <FaTrashAlt />
                         <span className="hidden sm:inline">Delete</span>
                       </Button>
                     </Popconfirm>
@@ -671,7 +701,8 @@ const FolderManager = () => {
 
             <Divider />
 
-            {/* Upload Section */}
+            {/* Upload Section - Only show if analysis is not complete */}
+            {selectedFolder.status !== "true" && selectedFolder.status !== true && (
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex-1">
@@ -710,6 +741,7 @@ const FolderManager = () => {
                 </Button>
               </div>
             </div>
+            )}
 
             {/* Files Table */}
             <div>

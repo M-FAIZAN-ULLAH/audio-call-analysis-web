@@ -449,7 +449,7 @@ const UploadAudio = () => {
                               <Text className="text-base font-bold text-gray-700">
                             {Math.round(emotion.score * 100)}%
                               </Text>
-                            </div>
+                          </div>
                             <Progress
                               percent={Math.round(emotion.score * 100)}
                               strokeColor={getEmotionColor(emotion.name)}

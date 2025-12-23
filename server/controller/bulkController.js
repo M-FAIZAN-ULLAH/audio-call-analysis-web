@@ -25,8 +25,14 @@ const performBulkAnalysis = async (req, res) => {
       
       try {
         // Process file through Flask API (sequential - waits for completion before next)
+        // Set timeout to 20 minutes (1200000ms) - Hume jobs can take 2-10 minutes per file
         const response = await axios.post("http://127.0.0.1:8000/upload", {
           url,
+        }, {
+          timeout: 1200000, // 20 minutes timeout
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
         
         const fileProcessingTime = ((Date.now() - fileStartTime) / 1000).toFixed(2);
@@ -51,16 +57,44 @@ const performBulkAnalysis = async (req, res) => {
       } catch (error) {
         const fileProcessingTime = ((Date.now() - fileStartTime) / 1000).toFixed(2);
         console.error(`[QUEUE] [${queuePosition}/${queueTotal}] Error processing file (${fileProcessingTime}s): ${error.message}`);
-        analysisResults.push({ 
-          url, 
-          result: {
-            success: false,
-            error: error.message,
-            message: `Error processing file: ${error.message}`,
-            results: null
-          },
-          error: error.message
-        });
+        
+        // Handle timeout errors specifically
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+          console.error(`[QUEUE] [${queuePosition}/${queueTotal}] Timeout Error: Flask request took too long`);
+          analysisResults.push({ 
+            url, 
+            result: {
+              success: false,
+              error: "Request timeout",
+              message: "Audio processing is taking longer than expected. The file may be too large.",
+              results: null
+            },
+            error: "Request timeout"
+          });
+        } else if (error.code === 'ECONNREFUSED' || error.message.includes('connect')) {
+          console.error(`[QUEUE] [${queuePosition}/${queueTotal}] Connection Error: Cannot connect to Flask service`);
+          analysisResults.push({ 
+            url, 
+            result: {
+              success: false,
+              error: "Service unavailable",
+              message: "Cannot connect to audio processing service. Please ensure Flask service is running.",
+              results: null
+            },
+            error: "Service unavailable"
+          });
+        } else {
+          analysisResults.push({ 
+            url, 
+            result: {
+              success: false,
+              error: error.message,
+              message: `Error processing file: ${error.message}`,
+              results: null
+            },
+            error: error.message
+          });
+        }
       }
       
       // Log queue progress

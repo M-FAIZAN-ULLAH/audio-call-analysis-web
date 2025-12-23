@@ -51,7 +51,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-black" style={{ backgroundColor: '#000000' }}>
       <div className="w-1/2 flex items-center justify-center">
         <Image src={image} alt="Key pana" className="h-90 max-h-full" />
       </div>

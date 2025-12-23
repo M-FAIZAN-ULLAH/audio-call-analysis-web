@@ -57,6 +57,23 @@ const bulkAnalysisController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+
+  getFolderById: async (req, res) => {
+    try {
+      console.log(`[API] GET /api/folders/:id - Get Folder - Folder ID: ${req.params.id}`);
+      const { id } = req.params;
+      const folder = await Folder.findById(id);
+      if (!folder) {
+        console.log(`[API] GET /api/folders/:id - Not Found - Folder ID: ${id}`);
+        return res.status(404).json({ error: "Folder not found" });
+      }
+      console.log(`[API] GET /api/folders/:id - Success - Folder ID: ${id}`);
+      res.status(200).json({ folder });
+    } catch (error) {
+      console.error(`[API] GET /api/folders/:id - Error: ${error.message}`);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
   uploadAudio: async (req, res) => {
     try {
       console.log(`[API] POST /api/folders/:id/audio - Upload Audio - Folder ID: ${req.params.id}, File: ${req.body.fileName}`);

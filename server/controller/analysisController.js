@@ -9,8 +9,14 @@ const createAnalysis = async (req, res) => {
     console.log(`[API] POST /api/analysis - Create Audio Analysis - URL: ${req.body.url}`);
     const link = req.body.url;
 
+    // Set timeout to 20 minutes (1200000ms) - Hume jobs can take 2-10 minutes
     const axiosResponse = await axios.post("http://127.0.0.1:8000/upload", {
       url: link,
+    }, {
+      timeout: 1200000, // 20 minutes timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     
     // Handle new standardized format from Flask
@@ -37,7 +43,30 @@ const createAnalysis = async (req, res) => {
     res.status(201).send(formattedData);
   } catch (error) {
     console.error(`[API] POST /api/analysis - Error: ${error.message}`);
-    res.status(500).send("Error processing data");
+    
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      console.error(`[API] POST /api/analysis - Timeout Error: Flask request took too long`);
+      return res.status(504).json({ 
+        error: "Request timeout",
+        message: "Audio processing is taking longer than expected. Please try again or check if the file is too large.",
+        details: "Hume API jobs typically take 2-5 minutes, but can take up to 10 minutes for large files."
+      });
+    }
+    
+    // Handle connection errors
+    if (error.code === 'ECONNREFUSED' || error.message.includes('connect')) {
+      console.error(`[API] POST /api/analysis - Connection Error: Cannot connect to Flask service`);
+      return res.status(503).json({ 
+        error: "Service unavailable",
+        message: "Cannot connect to audio processing service. Please ensure Flask service is running on port 8000."
+      });
+    }
+    
+    res.status(500).json({ 
+      error: "Error processing data",
+      message: error.message 
+    });
   }
 };
 

@@ -23,7 +23,7 @@ logging.basicConfig(
 TEST_AUDIO_URL = "http://res.cloudinary.com/dczyj0axu/video/upload/v1766418213/Fiver/xmoofcn9g4vhp8jcjjpj.mp3"
 
 # Use new API key
-HUME_API_KEY = os.getenv('HUME_API_KEY', 'Mzj1N5sW4Ss8RKll2q9WaGgWJ7K5rwbVUzIMRpo2Qm9ILn8E')
+HUME_API_KEY = os.getenv('HUME_API_KEY', 'CirCEvEsqm8cRAAHhyMcJGub6elwD7JtPLYHAWgqDkrFJHsA')
 
 
 def poll_job_status(client, job_id, max_wait_time=1800, poll_interval=10):
@@ -304,4 +304,3 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"\n❌ Test failed with error: {e}\n")
         exit(1)
-
